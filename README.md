@@ -143,4 +143,4 @@ Fill out the form as follows:
 
 ## 👤 Author
 
-Created by [Yasser](https://github.com/tuusuario), IAM Solution Architect specialized in SailPoint IIQ.
+Created by [Yaser Haddad](https://github.com/yaseerhee), IAM Solution Architect .
