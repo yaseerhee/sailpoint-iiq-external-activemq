@@ -7,7 +7,63 @@ This repository contains a ready-to-use `activemq.xml` file configured for Apach
 
 ---
 
-## 📄 Included File
+## ⚙️ Prerequisites and Installation
+
+To use this configuration, you'll need the following:
+
+### ✅ System Requirements
+
+- **Operating System**: RHEL 8 or 9 (tested on RHEL 9.0)
+- **Java**: OpenJDK 11 (ActiveMQ 5.17.x requires Java 8 or 11)
+- **Memory**: Minimum 2 GB RAM (4 GB recommended)
+- **Ports**: Open TCP ports 61616 (broker), 8161 (web console)
+- **Network Access**: Ensure IIQ server can reach this ActiveMQ host
+
+### 📦 Required Software
+
+- Apache ActiveMQ 5.17.x:
+  - [Download here](https://activemq.apache.org/components/classic/download/)
+  - Choose the binary distribution (`apache-activemq-5.17.x-bin.tar.gz`)
+
+### 📁 Installation Directory Structure
+
+Assume you're installing under `/opt/activemq`:
+
+```bash
+sudo mkdir -p /opt/activemq
+cd /opt
+sudo tar -xzf apache-activemq-5.17.x-bin.tar.gz
+sudo mv apache-activemq-5.17.x activemq
+```
+
+Ensure permissions are correct:
+
+```bash
+sudo chown -R activemq:activemq /opt/activemq
+```
+
+### 🚀 Starting the Broker
+
+To start ActiveMQ:
+
+```bash
+/opt/activemq/bin/activemq start
+```
+
+Optional: create a systemd service for persistence.
+
+### 🔥 Open Required Ports
+
+Make sure the following firewall ports are open:
+
+```bash
+sudo firewall-cmd --permanent --add-port=61616/tcp
+sudo firewall-cmd --permanent --add-port=8161/tcp
+sudo firewall-cmd --reload
+```
+
+Once the service is running, ActiveMQ will automatically create the required queues when they are first used by SailPoint IdentityIQ (as long as the authenticated user has admin rights on queues).
+
 
 ### `conf/activemq.xml`
 
@@ -143,4 +199,47 @@ Fill out the form as follows:
 
 ## 👤 Author
 
-Created by [Yaser Haddad](https://github.com/yaseerhee), IAM Solution Architect .
+Created by [Yasser](https://github.com/yaseerhee), IAM Solution Architect.
+
+
+---
+
+## 🛠️ Optional: Create a systemd Service (Recommended for Production)
+
+To enable automatic startup and proper service management, create a `systemd` service for ActiveMQ.
+
+### 📄 Create the service file:
+
+```bash
+sudo nano /etc/systemd/system/activemq.service
+```
+
+Paste the following content:
+
+```ini
+[Unit]
+Description=Apache ActiveMQ Broker
+After=network.target
+
+[Service]
+User=activemq
+Group=activemq
+ExecStart=/opt/activemq/bin/activemq start
+ExecStop=/opt/activemq/bin/activemq stop
+Restart=on-failure
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### ✅ Enable and Start the Service
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable activemq
+sudo systemctl start activemq
+sudo systemctl status activemq
+```
+
+This ensures ActiveMQ starts at boot and can be managed via `systemctl`.
