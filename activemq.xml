@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                           http://www.springframework.org/schema/beans/spring-beans.xsd 
+                           http://activemq.apache.org/schema/core 
+                           http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <!-- Broker -->
+    <broker xmlns="http://activemq.apache.org/schema/core" brokerName="localhost" dataDirectory="${activemq.data}">
+
+        <!-- Message Policy -->
+        <destinationPolicy>
+            <policyMap>
+                <policyEntries>
+                    <policyEntry topic=">">
+                        <pendingMessageLimitStrategy>
+                            <constantPendingMessageLimitStrategy limit="1000"/>
+                        </pendingMessageLimitStrategy>
+                    </policyEntry>
+                </policyEntries>
+            </policyMap>
+        </destinationPolicy>
+
+        <!-- Data Persistance -->
+        <persistenceAdapter>
+            <kahaDB directory="/opt/activemq/data/kahadb"/>
+        </persistenceAdapter>
+
+        <!-- SystemControl -->
+        <systemUsage>
+            <systemUsage>
+                <memoryUsage>
+                    <memoryUsage percentOfJvmHeap="70"/>
+                </memoryUsage>
+                <storeUsage>
+                    <storeUsage limit="100 gb"/>
+                </storeUsage>
+                <tempUsage>
+                    <tempUsage limit="50 gb"/>
+                </tempUsage>
+            </systemUsage>
+        </systemUsage>
+
+        <!-- TransportConnection -->
+        <transportConnectors>
+            <transportConnector name="openwire" uri="tcp://0.0.0.0:61616?maximumConnections=1000&amp;wireFormat.maxFrameSize=104857600"/>
+            <transportConnector name="ssl" uri="ssl://0.0.0.0:61617"/> <!-- Para entornos productivos -->
+        </transportConnectors>
+
+        <!-- SailPoint IIQ QUEUS-->
+        <destinations>
+            <queue physicalName="iiqBrokerStatsQueue"/>
+            <queue physicalName="iiqDestinationStatsQueue"/>
+            <queue physicalName="iiqSubscriptionStatsQueue"/>
+            <queue physicalName="accessHistoryExtractedObjects"/>
+            <queue physicalName="accessHistoryProcessingQueue"/>
+            <topic physicalName="ActiveMQ.Advisory.Connection"/>
+            <topic physicalName="ActiveMQ.Advisory.Queue"/>
+            <topic physicalName="ActiveMQ.Advisory.Topic"/>
+            <topic physicalName="ActiveMQ.Advisory.TempQueue"/>
+            <topic physicalName="ActiveMQ.Advisory.TempTopic"/>
+            <topic physicalName="ActiveMQ.Advisory.Producer.Queue.ActiveMQ.Statistics.Broker"/>
+        </destinations>
+
+        <!-- Security -->
+        <plugins>
+            <jaasAuthenticationPlugin configuration="activemq-domain"/>
+            <authorizationPlugin>
+                <map>
+                    <authorizationMap>
+                        <authorizationEntries>
+                            <authorizationEntry topic=">" read="consumers" write="producers" admin="admins"/>
+                            <authorizationEntry queue=">" read="producers,consumers" write="producers,consumers" admin="admins"/>
+
+                            <!-- Special Topics -->
+                            <authorizationEntry topic="ActiveMQ.Advisory.Connection" read="consumers" write="producers" admin="admins"/>
+                            <authorizationEntry topic="ActiveMQ.Advisory.Queue" read="consumers" write="producers" admin="admins"/>
+                            <authorizationEntry topic="ActiveMQ.Advisory.Topic" read="consumers" write="producers" admin="admins"/>
+                            <authorizationEntry topic="ActiveMQ.Advisory.TempQueue" read="consumers" write="producers" admin="admins"/>
+                            <authorizationEntry topic="ActiveMQ.Advisory.TempTopic" read="consumers" write="producers" admin="admins"/>
+                            <authorizationEntry queue="ActiveMQ.Statistics.Broker" read="consumers" write="producers" admin="admins"/>
+                            <authorizationEntry queue="ActiveMQ.Statistics.Destination.>" read="consumers" write="producers" admin="admins"/>
+                            <authorizationEntry queue="ActiveMQ.Statistics.Subscription.>" read="consumers" write="producers" admin="admins"/>
+
+                            <authorizationEntry topic="ActiveMQ.Advisory.Producer.Queue.ActiveMQ.Statistics.Broker" read="consumers" write="producers" admin="admins"/>
+                            <authorizationEntry topic="ActiveMQ.Advisory.Consumer.Queue.iiqBrokerStatsQueue" read="consumers" write="consumers" admin="consumers"/>
+                            <authorizationEntry topic="ActiveMQ.Advisory.Consumer.Queue.iiqDestinationStatsQueue" read="consumers" write="consumers" admin="consumers"/>
+                            <authorizationEntry topic="ActiveMQ.Advisory.Consumer.Queue.iiqSubscriptionStatsQueue" read="consumers" write="consumers" admin="consumers"/>
+                            <authorizationEntry topic="ActiveMQ.Advisory.Consumer.Queue.accessHistoryExtractedObjects" read="consumers" write="consumers" admin="consumers"/>
+                            <authorizationEntry topic="ActiveMQ.Advisory.Consumer.Queue.accessHistoryProcessingQueue" read="consumers" write="consumers" admin="consumers"/>
+
+                            <authorizationEntry topic="ActiveMQ.Advisory.>" read="producers,consumers" write="producers,consumers" admin="producers,consumers"/>
+                        </authorizationEntries>
+                    </authorizationMap>
+                </map>
+            </authorizationPlugin>
+            <statisticsBrokerPlugin/>
+        </plugins>
+
+    </broker>
+</beans>
