@@ -168,8 +168,6 @@ In IdentityIQ, go to:
 
 Fill out the form as follows:
 
-📷 Replace this text with a screenshot named `sailpoint-messaging-config.png` showing how you filled out the form.
-
 ### Typical Values:
 
 | Field                            | Example Value                                      |
